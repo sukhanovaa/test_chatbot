@@ -1,5 +1,6 @@
 services:
   web:
     build: .
+    container_name: 'my_chatbot'
     ports:
       - "6077:6077"

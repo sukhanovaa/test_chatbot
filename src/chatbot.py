@@ -8,6 +8,9 @@ from random import choice
 
 
 class Chatbot:
+    __slots__ = ('_device', 'model', 'tok', 'max_len'
+                 'bot_turns', 'user_turns', 'flow_cnt', 'bot_prefix')
+    
     USR_PREFIX = 'USER says: '
     BOT_PREFIXES = ('YOU reply: ', 'YOU reply (flirting) ', 'YOU reply (lovingly): ')
     HOT_TOPIC = ("Barbie or Oppenheimer?", 
@@ -20,7 +23,7 @@ class Chatbot:
         self._device = Chatbot.__check_device()
         peft_config = PeftConfig.from_pretrained(config['model_weights'])
         self.model = AutoModelForCausalLM.from_pretrained(peft_config.base_model_name_or_path, 
-                                                          load_in_8bit=True, device_map=self._device)
+                                                          device_map=self._device)  # load_in_8bit=True
         self.model = PeftModel.from_pretrained(self.model, config['model_weights'])
         self.model.eval()
 
@@ -30,7 +33,7 @@ class Chatbot:
         self.bot_turns = []
         self.user_turns = []
         self.flow_cnt = 0
-        self.user_times = []
+        # self.user_times = []
 
         self.bot_prefix = 0
 
@@ -41,7 +44,7 @@ class Chatbot:
         if is_available():
             return device('cuda:0')
         else:
-            raise RuntimeError('GPU not found, unable to load a chatbot')
+            return device('cpu')
         
     def __get_prefix_user(self, input_sequence: str):
         return self.USR_PREFIX + input_sequence
@@ -78,7 +81,6 @@ class Chatbot:
         return response
 
     def get_metrics(self):
-        # TODO
         metrics = ChatbotMetrics(self.bot_turns, self.user_turns)
         metrics_msg = f"""Thanks for the chat!
         The chat lasted {metrics['num_replies']} lines. 
@@ -94,11 +96,12 @@ class Chatbot:
         self.flow_cnt = 0
 
 
-# import yaml, os
-# os.chdir('src')
-# with open('config.yaml') as inp:
-#     config = yaml.load(inp, Loader=yaml.SafeLoader)
-# c = Chatbot(config)
-# print(c.on_start())
-# print(c.respond('I do not prefer anything'))
-# print(c.bot_turns)
+# if __name__ == '__main__':
+    # import yaml, os
+    # os.chdir('src')
+    # with open('config.yaml') as inp:
+    #     config = yaml.load(inp, Loader=yaml.SafeLoader)
+    # c = Chatbot(config)
+    # print(c.on_start())
+    # print(c.respond('I do not prefer anything'))
+    # print(c.bot_turns)
