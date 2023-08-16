@@ -1,3 +1,5 @@
-model_weights: "weights/"
+model_weights: "../weights/"
 server_port: 6077
 client_port: 6077
+# max_generate_length: ...
+# generation_ strategy: ... 

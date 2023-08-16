@@ -1,7 +1,13 @@
 transformers
 torch
 peft
+datasets 
+accelerate 
+bitsandbytes 
+scipy
+sacremoses 
+pandas
 fastapi
 uvicorn
-yaml
+pyyaml
 requests

@@ -2,5 +2,10 @@ services:
   web:
     build: .
     container_name: 'my_chatbot'
+    volumes:
+      # - type: bind
+      - ./weights:/weights
     ports:
       - "6077:6077"
+    command:
+      python3 serve.py

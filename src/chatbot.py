@@ -5,22 +5,23 @@ from peft import PeftModel, PeftConfig
 from metrics import ChatbotMetrics
 from time import time
 from random import choice
+from itertools import chain
 
 
 class Chatbot:
-    __slots__ = ('_device', 'model', 'tok', 'max_len'
-                 'bot_turns', 'user_turns', 'flow_cnt', 'bot_prefix')
+    __slots__ = ('_device', 'model', 'tok', 'max_len', 'bot_turns', 'user_turns', 'flow_cnt', 'bot_prefix')
     
+    # TODO: no prefixes + avoid repetition
     USR_PREFIX = 'USER says: '
     BOT_PREFIXES = ('YOU reply: ', 'YOU reply (flirting) ', 'YOU reply (lovingly): ')
-    HOT_TOPIC = ("Barbie or Oppenheimer?", 
+    HOT_TOPIC = ( #"Barbie or Oppenheimer?",  -- need more fresh data that is probably not in any corpora yet
                  "Have you ever taken a long hike?", 
                  "What's your favourite drink?", 
                  "Are you a Macaw, Parakeet, or Cacique?", 
                  "By the way, do you know what \"leucocholy\" means?")
 
     def __init__(self, config):
-        self._device = Chatbot.__check_device()
+        self._device = self._check_device()
         peft_config = PeftConfig.from_pretrained(config['model_weights'])
         self.model = AutoModelForCausalLM.from_pretrained(peft_config.base_model_name_or_path, 
                                                           device_map=self._device)  # load_in_8bit=True
@@ -37,10 +38,8 @@ class Chatbot:
 
         self.bot_prefix = 0
 
-        self._on_start()
-
-    @classmethod
-    def __check_device(cls):
+    @staticmethod
+    def _check_device():
         if is_available():
             return device('cuda:0')
         else:
@@ -53,12 +52,15 @@ class Chatbot:
         return self.BOT_PREFIXES[self.bot_prefix] + input_sequence
 
     def on_start(self):
-        msg = self.__get_prefix_bot()  + f"""Hello!
-        I am a friendly bot, available for a quick chat. Message me! Or hit Ctrl+C when you get tired.
+        msg = f"""Hello! I am a friendly bot, available for a quick chat. Message me! Or hit Ctrl+C when you get tired.
         {choice(self.HOT_TOPIC)}
 """
-        self.bot_turns.append(msg)
+        self.bot_turns.append(self.__get_prefix_bot() + msg)
         return msg
+    
+    def _gather_history(self):
+        return ' | '.join(chain.from_iterable(zip(self.bot_turns, self.user_turns))) + ' | ' + self.__get_prefix_bot()
+
 
     def _generate(self, history):
         prefix = self.tok(history, max_length=self.max_len, truncation=True, 
@@ -70,8 +72,7 @@ class Chatbot:
     def respond(self, user_input: str):
         self.user_turns.append(self.__get_prefix_user(user_input))
         self.flow_cnt += 1
-        history = '|'.join(self.bot_turns + self.user_turns) + self.__get_prefix_bot()
-        response = self._generate(history)  # temperature, repetition_penalty, ...
+        response = self._generate(self._gather_history())  # temperature, repetition_penalty, ...
         self.bot_turns.append(self.__get_prefix_bot() + response)
         # on flow_cnt > 10, > 30
         if self.flow_cnt == 10:
@@ -96,12 +97,12 @@ class Chatbot:
         self.flow_cnt = 0
 
 
-# if __name__ == '__main__':
-    # import yaml, os
-    # os.chdir('src')
-    # with open('config.yaml') as inp:
-    #     config = yaml.load(inp, Loader=yaml.SafeLoader)
-    # c = Chatbot(config)
-    # print(c.on_start())
-    # print(c.respond('I do not prefer anything'))
-    # print(c.bot_turns)
+if __name__ == '__main__':
+    import yaml
+    with open('config.yaml') as inp:
+        config = yaml.load(inp, Loader=yaml.SafeLoader)
+    c = Chatbot(config)
+    print(c.on_start())
+    t = input()
+    print(c.respond(t))
+    print(c.bot_turns)
