@@ -11,7 +11,7 @@ class ChatbotMetrics:
         self.ngrams_order = ngrams_order
 
     def __preprocess(self, sequence: str):
-        sequence = sequence.rsplit('|')[1]
+        # sequence = sequence.rsplit('|')[1]
         sequence = self.tok.tokenize(sequence.lower(), escape=False)
         return sequence
 
