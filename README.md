@@ -1,8 +1,12 @@
-Hello!
+I was given a short amount of time to build an open-conversation chatbot. I'd like to note that, while I knew of big LLMs and adaptive finetuning, I could not get my hands on these concepts (also because of inadequate hardware). I also never had to build everything in 5 hours, and it shows. 
 
-I accomplished exactly 0% of what was asked, but it still was fun to do. Unfortunately, I could not figure out LoRA support on CPU and thus test the whole setup.
+```
+docker compose up
+python3
+<configure training in model_finetune.ipynb>
+python3 model_interact.py
+```
 
-I'd like to note that, while I knew of big LLMs and adaptive finetuning, I could not get my hands on these concepts (also because of inadequate hardware). I also never had to build everything in 5 hours, and it shows. All in all, it was a fun task, and I'll test the whole pipeline regardless - I just need to get my hands on GPU.
 
 I started with
 
@@ -34,7 +38,7 @@ What I considered:
 I actually expect that interaction-based metrics per model are much more telling than the textual ones. In the absence of definition for a good interaction, what should one compute? The definition lies in a field of discourse (and not in purely linguistic studies), after all.
 
 
-There are also specialized metrics involving various aspects of quality, e.g. empathy: https://github.com/Sea94/ieval, which I think deserve attention. (This reminds me of Blade Runner.)
+There are also specialized metrics involving various aspects of quality, e.g. empathy: https://github.com/Sea94/ieval, which I think deserve attention.
 
 
 Then I decided to
@@ -52,7 +56,7 @@ Surprisingly, an OPT-1.3B model was pretty small, high in Alpha and decent in te
 
 If I had had enough time/compute, I'd switch to the fresh LLaMA-2 (7B) -- it demonstrates a good average on the leaderboard tasks. As it turned out, Colab had a hard time supporting even 1.3 billion parameters.
 
-I chose LoRA simply because this is the most simple concept of 'adapting' to me. 
+I chose LoRA simply because this is the most simple concept of 'adapting' to me. Prefix tuning seems to be much more promising, though, since it might serve as a proxy task definition in the absence of seq2seq-like approach.
 
 After that, it was time to
 
