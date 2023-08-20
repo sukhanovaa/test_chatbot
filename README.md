@@ -2,7 +2,6 @@ I was given a short amount of time to build an open-conversation chatbot. I'd li
 
 ```
 docker compose up
-python3
 <configure training in model_finetune.ipynb>
 python3 model_interact.py
 ```
