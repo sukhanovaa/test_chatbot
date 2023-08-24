@@ -1,3 +1,5 @@
+WIP
+
 I was given a short amount of time to build an open-conversation chatbot. I'd like to note that, while I knew of big LLMs and adaptive finetuning, I could not get my hands on these concepts (also because of inadequate hardware). I also never had to build everything in 5 hours, and it shows. 
 
 ```
